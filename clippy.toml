@@ -1,0 +1,55 @@
+# Every not-deprecated clippy variable written explicitly, from 
+# https://github.com/rust-lang/rust-clippy/blob/0e5e2c436584ca9ad02d3c7edec8ffa116f1419f/clippy_lints/src/utils/conf.rs#L108-L161
+
+# Lint: BLACKLISTED-NAME. The list of blacklisted names to lint about
+blacklisted-names = ["foo", "bar", "baz", "quux"]
+# Lint: COGNITIVE-COMPLEXITY. The maximum cognitive complexity a function can have
+cognitive-complexity-threshold = 15 #25 <-- default value
+# Lint: DOC-MARKDOWN. The list of words this lint should not consider as identifiers needing ticks
+doc-valid-idents = [
+  "KiB", "MiB", "GiB", "TiB", "PiB", "EiB",
+  "DirectX",
+  "ECMAScript",
+  "GPLv2", "GPLv3",
+  "GitHub", "GitLab",
+  "IPv4", "IPv6",
+  "JavaScript",
+  "NaN", "NaNs",
+  "OAuth",
+  "OpenGL", "OpenSSH", "OpenSSL", "OpenStreetMap",
+  "TrueType",
+  "iOS", "macOS",
+  "TeX", "LaTeX", "BibTeX", "BibLaTeX",
+  "MinGW",
+  "CamelCase",
+  "SQLite", "PostgreSQL", "MySQL", # added
+  "IPv4", "IPv6" # added
+]
+# Lint: TOO-MANY-ARGUMENTS. The maximum number of argument a function or method can have
+too-many-arguments-threshold = 4 #7
+# Lint: TYPE-COMPLEXITY. The maximum complexity a type can have
+type-complexity-threshold = 150 #250
+# Lint: MANY-SINGLE-CHAR-NAMES. The maximum number of single char bindings a scope may have
+single-char-binding-names-threshold = 3 #5
+# Lint: BOXED-LOCAL. The maximum size of objects (in bytes) that will be linted. Larger objects are ok on the heap
+too-large-for-stack = 200
+# Lint: ENUM-VARIANT-NAMES. The minimum number of enum variants for the lints about variant names to trigger
+enum-variant-name-threshold = 2 #3
+# Lint: LARGE-ENUM-VARIANT. The maximum size of a enum's variant to avoid box suggestion
+enum-variant-size-threshold = 200
+# Lint: VERBOSE-BIT-MASK. The maximum allowed size of a bit mask before suggesting to use 'trailing-zeros'
+verbose-bit-mask-threshold = 1
+# Lint: DECIMAL-LITERAL-REPRESENTATION. The lower bound for linting decimal literals
+literal-representation-threshold = 16384
+# Lint: TRIVIALLY-COPY-PASS-BY-REF. The maximum size (in bytes) to consider a `Copy` type for passing by value instead of by reference.
+trivial-copy-size-limit = 8
+# Lint: TOO-MANY-LINES. The maximum number of lines a function or method can have
+too-many-lines-threshold = 20 #100
+# Lint: LARGE-STACK-ARRAYS. The maximum allowed size for arrays on the stack
+array-size-threshold = 512000
+# Lint: VEC-BOX. The size of the boxed type in bytes, where boxing in a `Vec` is allowed
+vec-box-size-threshold = 4096
+# Lint: STRUCT-EXCESSIVE-BOOLS. The maximum number of bools a struct can have
+# not working: max-struct-bools = 3
+# Lint: FN-PARAMS-EXCESSIVE-BOOLS. The maximum number of bools function parameters can have
+# not working: max-fn-params-bools = 1 #3
