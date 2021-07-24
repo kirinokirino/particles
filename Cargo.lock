@@ -18,6 +18,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "atomic_refcell"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "681b971236e0f76b20fcafca0236b8718c9186ee778d67cd78bd5f28fd85427f"
+
+[[package]]
 name = "autocfg"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -82,17 +88,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "derivative"
-version = "2.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fcc3dd5e9e9c0b295d6e1e4d811fb6f157d5ffd784b8d202fc62eac8035a770b"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "downcast-rs"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -154,21 +149,21 @@ dependencies = [
 
 [[package]]
 name = "itertools"
-version = "0.9.0"
+version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "284f18f85651fe11e8a991b2adb42cb078325c996ed026d994719efcfca1d54b"
+checksum = "69ddb889f9d0d08a67338271fa9b62996bc788c7796a5c18cf057420aaed5eaf"
 dependencies = [
  "either",
 ]
 
 [[package]]
 name = "legion"
-version = "0.3.1"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9aa40f1a5f64dfdc1830657e0e7dd2c28087c4e32a2a85fcf63a286c429edefc"
+checksum = "6bfd53bb4690a5ab2bd6d1c683461ee52763afe0d000929743708a256d9d9b1f"
 dependencies = [
+ "atomic_refcell",
  "bit-set",
- "derivative",
  "downcast-rs",
  "itertools",
  "legion_codegen",
@@ -181,9 +176,9 @@ dependencies = [
 
 [[package]]
 name = "legion_codegen"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c24e58060e656eae6b87f83f14f41080656a930fba7ef299122e40eb8ccd307f"
+checksum = "8ad5ad7a361d7b2522010335d95fa73135cb3c6816bef22cc7a5d5861587ae1b"
 dependencies = [
  "proc-macro2",
  "quote",
