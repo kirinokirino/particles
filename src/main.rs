@@ -28,7 +28,17 @@
 )]
 
 use legion::*;
-use macroquad::*;
+use macroquad::camera::{set_camera, set_default_camera, Camera2D};
+use macroquad::color::*;
+use macroquad::color_u8;
+use macroquad::input::{is_key_down, is_mouse_button_down, mouse_position, KeyCode, MouseButton};
+use macroquad::logging::*;
+use macroquad::math::{vec2, Vec2};
+use macroquad::rand;
+use macroquad::shapes::draw_circle;
+use macroquad::text::draw_text;
+use macroquad::time::get_time;
+use macroquad::window::{clear_background, next_frame, screen_height, screen_width};
 #[derive(Clone, Copy, Debug, PartialEq)]
 struct Position {
     pos: Vec2,
@@ -68,7 +78,7 @@ struct Time {
 fn draw_ui() {
     // Screen space, render fixed ui
     set_default_camera();
-    let text_color: Color = Color([100, 100, 100, 150]);
+    let text_color = color_u8!(100, 100, 100, 150);
     draw_text("\",aoe\" to move camera", 10.0, 0.0, 30.0, text_color);
     draw_text(
         "PageUp and PageDown / \"'\" \".\" to zoom camera",
@@ -82,46 +92,38 @@ fn draw_ui() {
 fn move_camera(camera: &mut Camera) {
     // scroll
     if is_key_down(KeyCode::Comma) {
-        camera
-            .target
-            .set_y(camera.target.y() + 0.01 / camera.zoom.x())
+        camera.target.y = camera.target.y + 0.01 / camera.zoom.x
     }
     if is_key_down(KeyCode::O) {
-        camera
-            .target
-            .set_y(camera.target.y() - 0.01 / camera.zoom.x())
+        camera.target.y = camera.target.y - 0.01 / camera.zoom.x
     }
     if is_key_down(KeyCode::A) {
-        camera
-            .target
-            .set_x(camera.target.x() - 0.01 / camera.zoom.x())
+        camera.target.x = camera.target.x - 0.01 / camera.zoom.x
     }
     if is_key_down(KeyCode::E) {
-        camera
-            .target
-            .set_x(camera.target.x() + 0.01 / camera.zoom.x())
+        camera.target.x = camera.target.x + 0.01 / camera.zoom.x
     }
     // zoom
     if is_key_down(KeyCode::PageUp) || is_key_down(KeyCode::Apostrophe) {
-        camera.zoom.set_x(camera.zoom.x() * 0.98);
-        camera.zoom.set_y(camera.zoom.y() * 0.98);
+        camera.zoom.x = camera.zoom.x * 0.98;
+        camera.zoom.y = camera.zoom.y * 0.98;
     }
     if is_key_down(KeyCode::PageDown) || is_key_down(KeyCode::Period) {
-        camera.zoom.set_x(camera.zoom.x() / 0.98);
-        camera.zoom.set_y(camera.zoom.y() / 0.98);
+        camera.zoom.x = camera.zoom.x / 0.98;
+        camera.zoom.y = camera.zoom.y / 0.98;
     }
 }
 
 fn get_relative_mouse_position(camera: &Camera) -> Vec2 {
     let mouse = mouse_position();
     Vec2::new(
-        ((mouse.0 - screen_width() / 2.0) / (screen_width() / 2.0) / camera.zoom.x())
-            + camera.target.x(),
+        ((mouse.0 - screen_width() / 2.0) / (screen_width() / 2.0) / camera.zoom.x)
+            + camera.target.x,
         ((-mouse.1 + screen_height() / 2.0)
             / (screen_height() / 2.0)
-            / camera.zoom.x()
+            / camera.zoom.x
             / (screen_width() / screen_height()))
-            + camera.target.y(),
+            + camera.target.y,
     )
 }
 
@@ -147,36 +149,31 @@ fn create_particle(position: Vec2) -> (Position, Velocity, Acceleration, Mass, C
 
 #[system(for_each)]
 fn apply_gravity(acc: &mut Acceleration, mass: &Mass, #[resource] time: &Time) {
-    acc.acc
-        .set_y(acc.acc.y() + -50.0 * mass.mass * time.elapsed_seconds as f32);
+    acc.acc.y = acc.acc.y + -50.0 * mass.mass * time.elapsed_seconds as f32;
 }
 
 #[system(for_each)]
 fn drop_acceleration(acc: &mut Acceleration) {
-    acc.acc.set_y(0.0);
-    acc.acc.set_x(0.0);
+    acc.acc.y = 0.0;
+    acc.acc.x = 0.0;
 }
 
 #[system(for_each)]
 fn apply_air_drag(vel: &mut Velocity) {
-    vel.vel.set_y(vel.vel.y() * 0.999);
-    vel.vel.set_x(vel.vel.x() * 0.999);
+    vel.vel.y = vel.vel.y * 0.999;
+    vel.vel.x = vel.vel.x * 0.999;
 }
 
 #[system(for_each)]
 fn update_velocity(vel: &mut Velocity, acc: &Acceleration, #[resource] time: &Time) {
-    vel.vel
-        .set_x(vel.vel.x() + acc.acc.x() * time.elapsed_seconds as f32);
-    vel.vel
-        .set_y(vel.vel.y() + acc.acc.y() * time.elapsed_seconds as f32);
+    vel.vel.x = vel.vel.x + acc.acc.x * time.elapsed_seconds as f32;
+    vel.vel.y = vel.vel.y + acc.acc.y * time.elapsed_seconds as f32;
 }
 
 #[system(for_each)]
 fn update_position(pos: &mut Position, vel: &Velocity, #[resource] time: &Time) {
-    pos.pos
-        .set_x(pos.pos.x() + vel.vel.x() * time.elapsed_seconds as f32);
-    pos.pos
-        .set_y(pos.pos.y() + vel.vel.y() * time.elapsed_seconds as f32);
+    pos.pos.x = pos.pos.x + vel.vel.x * time.elapsed_seconds as f32;
+    pos.pos.y = pos.pos.y + vel.vel.y * time.elapsed_seconds as f32;
 }
 
 #[macroquad::main("Name")]
@@ -227,7 +224,7 @@ async fn main() {
             if mouse_pressed == false {
                 let pos = get_relative_mouse_position(&main_camera);
                 let _ = world.push(create_particle(pos));
-                info!("Mouse pressed at x:{} , y:{}", pos.x(), pos.y())
+                info!("Mouse pressed at x:{} , y:{}", pos.x, pos.y)
             }
             mouse_pressed = true;
         } else {
@@ -236,10 +233,10 @@ async fn main() {
 
         // Draw
 
-        clear_background(Color([255, 255, 255, 255]));
+        clear_background(color_u8!(255, 255, 255, 255));
 
         // Camera space, render game objects
-        set_camera(Camera2D {
+        set_camera(&Camera2D {
             target: main_camera.target,
             zoom: main_camera.zoom,
             ..Default::default()
@@ -250,18 +247,18 @@ async fn main() {
 
         for (position, circle) in query.iter_mut(&mut world) {
             draw_circle(
-                position.pos.x(),
-                position.pos.y(),
+                position.pos.x,
+                position.pos.y,
                 circle.r,
-                Color([100, 150, 200, 255]),
+                color_u8!(100, 150, 200, 255),
             )
         }
 
         draw_circle(
-            mouse_position.x(),
-            mouse_position.y(),
+            mouse_position.x,
+            mouse_position.y,
             0.2,
-            Color([200, 150, 225, 255]),
+            color_u8!(200, 150, 225, 255),
         );
 
         draw_ui();
