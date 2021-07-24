@@ -11,9 +11,8 @@
     clippy::let_underscore_must_use,
     clippy::mem_forget,
     clippy::multiple_inherent_impl,
-    clippy::option_unwrap_used,
+    clippy::unwrap_used,
     clippy::rest_pat_in_fully_bound_structs,
-    clippy::result_unwrap_used,
     clippy::shadow_reuse,
     clippy::shadow_same,
     clippy::string_add,
@@ -22,17 +21,16 @@
 )]
 #![allow(
     clippy::missing_docs_in_private_items,
-    clippy::unknown_clippy_lints,
-    clippy::option_expect_used,
-    clippy::result_expect_used
+    unknown_lints,
+    clippy::expect_used
 )]
 
-use legion::*;
+use legion::{system, IntoQuery, Resources, Schedule, World};
 use macroquad::camera::{set_camera, set_default_camera, Camera2D};
-use macroquad::color::*;
+use macroquad::color::Color;
 use macroquad::color_u8;
 use macroquad::input::{is_key_down, is_mouse_button_down, mouse_position, KeyCode, MouseButton};
-use macroquad::logging::*;
+use macroquad::logging::{info, warn};
 use macroquad::math::{vec2, Vec2};
 use macroquad::rand;
 use macroquad::shapes::draw_circle;
@@ -92,25 +90,25 @@ fn draw_ui() {
 fn move_camera(camera: &mut Camera) {
     // scroll
     if is_key_down(KeyCode::Comma) {
-        camera.target.y = camera.target.y + 0.01 / camera.zoom.x
+        camera.target.y += 0.01 / camera.zoom.x
     }
     if is_key_down(KeyCode::O) {
-        camera.target.y = camera.target.y - 0.01 / camera.zoom.x
+        camera.target.y -= 0.01 / camera.zoom.x
     }
     if is_key_down(KeyCode::A) {
-        camera.target.x = camera.target.x - 0.01 / camera.zoom.x
+        camera.target.x -= 0.01 / camera.zoom.x
     }
     if is_key_down(KeyCode::E) {
-        camera.target.x = camera.target.x + 0.01 / camera.zoom.x
+        camera.target.x += 0.01 / camera.zoom.x
     }
     // zoom
     if is_key_down(KeyCode::PageUp) || is_key_down(KeyCode::Apostrophe) {
-        camera.zoom.x = camera.zoom.x * 0.98;
-        camera.zoom.y = camera.zoom.y * 0.98;
+        camera.zoom.x *= 0.98;
+        camera.zoom.y *= 0.98;
     }
     if is_key_down(KeyCode::PageDown) || is_key_down(KeyCode::Period) {
-        camera.zoom.x = camera.zoom.x / 0.98;
-        camera.zoom.y = camera.zoom.y / 0.98;
+        camera.zoom.x /= 0.98;
+        camera.zoom.y /= 0.98;
     }
 }
 
@@ -128,28 +126,26 @@ fn get_relative_mouse_position(camera: &Camera) -> Vec2 {
 }
 
 fn create_particle(position: Vec2) -> (Position, Velocity, Acceleration, Mass, Circle) {
-    let mass = rand::gen_range(1, 5) as f32;
-    return (
+    let mass = rand::gen_range(1., 5.);
+    (
         Position { pos: position },
         Velocity {
             vel: Vec2::new(0.0, 0.0),
         },
         Acceleration {
-            acc: Vec2::new(
-                rand::gen_range(-400, 400) as f32,
-                rand::gen_range(-400, 400) as f32,
-            ),
+            acc: Vec2::new(rand::gen_range(-400., 400.), rand::gen_range(-400., 400.)),
         },
         Mass { mass },
         Circle {
             r: (mass / std::f32::consts::PI).sqrt(),
         },
-    );
+    )
 }
 
 #[system(for_each)]
+#[allow(clippy::cast_possible_truncation)]
 fn apply_gravity(acc: &mut Acceleration, mass: &Mass, #[resource] time: &Time) {
-    acc.acc.y = acc.acc.y + -50.0 * mass.mass * time.elapsed_seconds as f32;
+    acc.acc.y += -50.0 * mass.mass * time.elapsed_seconds as f32;
 }
 
 #[system(for_each)]
@@ -160,22 +156,26 @@ fn drop_acceleration(acc: &mut Acceleration) {
 
 #[system(for_each)]
 fn apply_air_drag(vel: &mut Velocity) {
-    vel.vel.y = vel.vel.y * 0.999;
-    vel.vel.x = vel.vel.x * 0.999;
+    vel.vel.y *= 0.999;
+    vel.vel.x *= 0.999;
 }
 
 #[system(for_each)]
+#[allow(clippy::cast_possible_truncation, clippy::trivially_copy_pass_by_ref)]
 fn update_velocity(vel: &mut Velocity, acc: &Acceleration, #[resource] time: &Time) {
-    vel.vel.x = vel.vel.x + acc.acc.x * time.elapsed_seconds as f32;
-    vel.vel.y = vel.vel.y + acc.acc.y * time.elapsed_seconds as f32;
+    vel.vel.x += acc.acc.x * time.elapsed_seconds as f32;
+    vel.vel.y += acc.acc.y * time.elapsed_seconds as f32;
 }
 
 #[system(for_each)]
+#[allow(clippy::cast_possible_truncation, clippy::trivially_copy_pass_by_ref)]
 fn update_position(pos: &mut Position, vel: &Velocity, #[resource] time: &Time) {
-    pos.pos.x = pos.pos.x + vel.vel.x * time.elapsed_seconds as f32;
-    pos.pos.y = pos.pos.y + vel.vel.y * time.elapsed_seconds as f32;
+    pos.pos.x += vel.vel.x * time.elapsed_seconds as f32;
+    pos.pos.y += vel.vel.y * time.elapsed_seconds as f32;
 }
 
+// I don't know how to apply this line.
+#[allow(clippy::future_not_send, clippy::too_many_lines)]
 #[macroquad::main("Name")]
 async fn main() {
     let mut world = World::default();
@@ -213,7 +213,7 @@ async fn main() {
             overall_time: get_time(),
         };
         //info!("{}", time.elapsed_seconds);
-        resources.insert(time.clone());
+        resources.insert(time);
         let mouse_position = get_relative_mouse_position(&main_camera);
         move_camera(&mut main_camera);
         if is_key_down(KeyCode::Right) {}
@@ -221,7 +221,7 @@ async fn main() {
         if is_key_down(KeyCode::Down) {}
         if is_key_down(KeyCode::Up) {}
         if is_mouse_button_down(MouseButton::Left) {
-            if mouse_pressed == false {
+            if !mouse_pressed {
                 let pos = get_relative_mouse_position(&main_camera);
                 let _ = world.push(create_particle(pos));
                 info!("Mouse pressed at x:{} , y:{}", pos.x, pos.y)
@@ -239,7 +239,7 @@ async fn main() {
         set_camera(&Camera2D {
             target: main_camera.target,
             zoom: main_camera.zoom,
-            ..Default::default()
+            ..Camera2D::default()
         });
 
         // construct a query from a "view tuple"
