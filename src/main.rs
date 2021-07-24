@@ -25,7 +25,11 @@
     clippy::expect_used
 )]
 
-use legion::{system, IntoQuery, Resources, Schedule, World};
+mod systems;
+use systems::init;
+mod components;
+use components::{Acceleration, Camera, Circle, Mass, Position, Time, Velocity};
+use legion::{IntoQuery, Resources, World};
 use macroquad::camera::{set_camera, set_default_camera, Camera2D};
 use macroquad::color::Color;
 use macroquad::color_u8;
@@ -37,41 +41,6 @@ use macroquad::shapes::draw_circle;
 use macroquad::text::draw_text;
 use macroquad::time::get_time;
 use macroquad::window::{clear_background, next_frame, screen_height, screen_width};
-#[derive(Clone, Copy, Debug, PartialEq)]
-struct Position {
-    pos: Vec2,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-struct Velocity {
-    vel: Vec2,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-struct Acceleration {
-    acc: Vec2,
-}
-
-struct Mass {
-    mass: f32,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-struct Circle {
-    r: f32,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-struct Camera {
-    target: Vec2,
-    zoom: Vec2,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-struct Time {
-    elapsed_seconds: f64,
-    overall_time: f64,
-}
 
 fn draw_ui() {
     // Screen space, render fixed ui
@@ -142,38 +111,6 @@ fn create_particle(position: Vec2) -> (Position, Velocity, Acceleration, Mass, C
     )
 }
 
-#[system(for_each)]
-#[allow(clippy::cast_possible_truncation)]
-fn apply_gravity(acc: &mut Acceleration, mass: &Mass, #[resource] time: &Time) {
-    acc.acc.y += -50.0 * mass.mass * time.elapsed_seconds as f32;
-}
-
-#[system(for_each)]
-fn drop_acceleration(acc: &mut Acceleration) {
-    acc.acc.y = 0.0;
-    acc.acc.x = 0.0;
-}
-
-#[system(for_each)]
-fn apply_air_drag(vel: &mut Velocity) {
-    vel.vel.y *= 0.999;
-    vel.vel.x *= 0.999;
-}
-
-#[system(for_each)]
-#[allow(clippy::cast_possible_truncation, clippy::trivially_copy_pass_by_ref)]
-fn update_velocity(vel: &mut Velocity, acc: &Acceleration, #[resource] time: &Time) {
-    vel.vel.x += acc.acc.x * time.elapsed_seconds as f32;
-    vel.vel.y += acc.acc.y * time.elapsed_seconds as f32;
-}
-
-#[system(for_each)]
-#[allow(clippy::cast_possible_truncation, clippy::trivially_copy_pass_by_ref)]
-fn update_position(pos: &mut Position, vel: &Velocity, #[resource] time: &Time) {
-    pos.pos.x += vel.vel.x * time.elapsed_seconds as f32;
-    pos.pos.y += vel.vel.y * time.elapsed_seconds as f32;
-}
-
 // I don't know how to apply this line.
 #[allow(clippy::future_not_send, clippy::too_many_lines)]
 #[macroquad::main("Name")]
@@ -186,6 +123,9 @@ async fn main() {
     };
     resources.insert(time);
 
+    // construct a schedule (you should do this on init)
+    let mut schedule = init();
+
     let starting_zoom = 0.05;
     let mut main_camera = Camera {
         target: vec2(0.0, 0.0),
@@ -196,15 +136,6 @@ async fn main() {
     };
 
     let mut mouse_pressed = false;
-
-    // construct a schedule (you should do this on init)
-    let mut schedule = Schedule::builder()
-        .add_system(apply_gravity_system())
-        .add_system(update_velocity_system())
-        .add_system(apply_air_drag_system())
-        .add_system(update_position_system())
-        .add_system(drop_acceleration_system())
-        .build();
 
     loop {
         // Update
