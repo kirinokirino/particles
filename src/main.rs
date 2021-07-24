@@ -69,9 +69,9 @@ fn draw_ui() {
     // Screen space, render fixed ui
     set_default_camera();
     let text_color: Color = Color([100, 100, 100, 150]);
-    draw_text(",aoe to move camera", 10.0, 0.0, 30.0, text_color);
+    draw_text("\",aoe\" to move camera", 10.0, 0.0, 30.0, text_color);
     draw_text(
-        "PageUp and PageDown to zoom camera",
+        "PageUp and PageDown / \"'\" \".\" to zoom camera",
         10.0,
         50.0,
         30.0,
@@ -84,29 +84,29 @@ fn move_camera(camera: &mut Camera) {
     if is_key_down(KeyCode::Comma) {
         camera
             .target
-            .set_y(camera.target.y() - 0.01 / camera.zoom.x())
+            .set_y(camera.target.y() + 0.01 / camera.zoom.x())
     }
     if is_key_down(KeyCode::O) {
         camera
             .target
-            .set_y(camera.target.y() + 0.01 / camera.zoom.x())
+            .set_y(camera.target.y() - 0.01 / camera.zoom.x())
     }
     if is_key_down(KeyCode::A) {
         camera
             .target
-            .set_x(camera.target.x() + 0.01 / camera.zoom.x())
+            .set_x(camera.target.x() - 0.01 / camera.zoom.x())
     }
     if is_key_down(KeyCode::E) {
         camera
             .target
-            .set_x(camera.target.x() - 0.01 / camera.zoom.x())
+            .set_x(camera.target.x() + 0.01 / camera.zoom.x())
     }
     // zoom
-    if is_key_down(KeyCode::PageUp) {
+    if is_key_down(KeyCode::PageUp) || is_key_down(KeyCode::Apostrophe) {
         camera.zoom.set_x(camera.zoom.x() * 0.98);
         camera.zoom.set_y(camera.zoom.y() * 0.98);
     }
-    if is_key_down(KeyCode::PageDown) {
+    if is_key_down(KeyCode::PageDown) || is_key_down(KeyCode::Period) {
         camera.zoom.set_x(camera.zoom.x() / 0.98);
         camera.zoom.set_y(camera.zoom.y() / 0.98);
     }
