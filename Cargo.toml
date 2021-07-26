@@ -18,7 +18,6 @@ members = ["crates/*"]
 [dependencies]
 particles_ecs = {path = "crates/particles_ecs", version = "0.1.0" }
 macroquad = { version = "0.3.7", default-features = false, features = ["log-impl"] }
-legion = { version = "0.4.0", default-features = false, features = ["codegen"] }
 
 [profile.dev]
 opt-level = 1

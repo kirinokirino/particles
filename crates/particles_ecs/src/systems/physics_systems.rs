@@ -1,7 +1,7 @@
 use crate::components::common::*;
 use crate::components::physics_components::*;
 use crate::components::physics_obj::*;
-use legion::{system, Resources, Schedule, World};
+use legion::{system, IntoQuery, Query, Resources, Schedule, World};
 use macroquad::math::Vec2;
 
 pub fn resources() -> Resources {
@@ -24,6 +24,25 @@ pub fn schedule() -> Schedule {
         .add_system(drop_acceleration_system())
         .add_system(update_objects_system())
         .build()
+}
+
+pub fn get_component_objects() -> Query<(&'static Position, &'static Circle)> {
+    <(&Position, &Circle)>::query()
+
+    /*
+    for (position, circle) in query.iter_mut(&mut world) {
+        draw_circle(position.pos.x, position.pos.y, circle.r, circle.color)
+    }
+
+    let mut query = <(&Object, &Circle)>::query();
+    for (object, circle) in query.iter(&world) {
+        draw_circle(object.pos.x, object.pos.y, circle.r, circle.color)
+    }
+     */
+}
+
+pub fn get_objects() -> Query<(&'static Object, &'static Circle)> {
+    <(&Object, &Circle)>::query()
 }
 
 #[system(for_each)]

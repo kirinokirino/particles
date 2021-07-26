@@ -865,7 +865,6 @@ dependencies = [
 name = "particles"
 version = "0.1.0"
 dependencies = [
- "legion",
  "macroquad",
  "particles_ecs",
 ]

@@ -25,7 +25,6 @@
     clippy::expect_used
 )]
 
-use legion::IntoQuery;
 use macroquad::camera::{set_camera, set_default_camera, Camera2D};
 use macroquad::color::Color;
 use macroquad::color_u8;
@@ -40,7 +39,9 @@ use macroquad::window::{clear_background, next_frame, screen_height, screen_widt
 use particles_ecs::components::common::{Camera, Circle, Time};
 use particles_ecs::components::physics_components::{Acceleration, Mass, Position, Velocity};
 use particles_ecs::components::physics_obj::Object;
-use particles_ecs::systems::physics_systems::{resources, schedule, world};
+use particles_ecs::systems::physics_systems::{
+    get_component_objects, get_objects, resources, schedule, world,
+};
 
 fn draw_ui() {
     // Screen space, render fixed ui
@@ -194,13 +195,13 @@ async fn main() {
         });
 
         // construct a query from a "view tuple"
-        let mut query = <(&Position, &Circle)>::query();
+        let mut query = get_component_objects();
 
         for (position, circle) in query.iter_mut(&mut world) {
             draw_circle(position.pos.x, position.pos.y, circle.r, circle.color)
         }
 
-        let mut query = <(&Object, &Circle)>::query();
+        let mut query = get_objects();
         for (object, circle) in query.iter(&world) {
             draw_circle(object.pos.x, object.pos.y, circle.r, circle.color)
         }
