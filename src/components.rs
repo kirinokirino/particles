@@ -1,4 +1,13 @@
+use macroquad::color::Color;
 use macroquad::math::Vec2;
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Object {
+    pub pos: Vec2,
+    pub vel: Vec2,
+    pub acc: Vec2,
+    pub mass: f32,
+}
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Position {
@@ -22,6 +31,7 @@ pub struct Mass {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Circle {
     pub r: f32,
+    pub color: Color,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]

@@ -1,5 +1,6 @@
-use crate::components::{Acceleration, Mass, Position, Time, Velocity};
+use crate::components::{Acceleration, Mass, Object, Position, Time, Velocity};
 use legion::{system, Schedule};
+use macroquad::math::Vec2;
 
 pub fn init() -> Schedule {
     // construct a schedule (you should do this on init)
@@ -9,7 +10,19 @@ pub fn init() -> Schedule {
         .add_system(apply_air_drag_system())
         .add_system(update_position_system())
         .add_system(drop_acceleration_system())
+        .add_system(update_objects_system())
         .build()
+}
+
+#[system(for_each)]
+#[allow(clippy::cast_possible_truncation)]
+fn update_objects(obj: &mut Object, #[resource] time: &Time) {
+    let time: f32 = time.elapsed_seconds as f32;
+    obj.acc.y += -50.0 * obj.mass * time;
+    obj.vel += obj.acc * time;
+    obj.vel *= 0.999;
+    obj.pos += obj.vel * time;
+    obj.acc = Vec2::ZERO;
 }
 
 #[system(for_each)]

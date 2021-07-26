@@ -25,10 +25,10 @@
     clippy::expect_used
 )]
 
-mod systems;
+pub mod systems;
 use systems::init;
-mod components;
-use components::{Acceleration, Camera, Circle, Mass, Position, Time, Velocity};
+pub mod components;
+use components::{Acceleration, Camera, Circle, Mass, Object, Position, Time, Velocity};
 use legion::{IntoQuery, Resources, World};
 use macroquad::camera::{set_camera, set_default_camera, Camera2D};
 use macroquad::color::Color;
@@ -94,6 +94,21 @@ fn get_relative_mouse_position(camera: &Camera) -> Vec2 {
     )
 }
 
+fn create_obj(position: Vec2) -> (Object, Circle) {
+    let mass = rand::gen_range(1., 5.);
+    (
+        Object {
+            pos: position,
+            vel: Vec2::new(0.0, 0.0),
+            acc: Vec2::new(rand::gen_range(-400., 400.), rand::gen_range(-400., 400.)),
+            mass: mass,
+        },
+        Circle {
+            r: (mass / std::f32::consts::PI).sqrt(),
+            color: color_u8!(255, 180, 220, 255),
+        },
+    )
+}
 fn create_particle(position: Vec2) -> (Position, Velocity, Acceleration, Mass, Circle) {
     let mass = rand::gen_range(1., 5.);
     (
@@ -107,6 +122,7 @@ fn create_particle(position: Vec2) -> (Position, Velocity, Acceleration, Mass, C
         Mass { mass },
         Circle {
             r: (mass / std::f32::consts::PI).sqrt(),
+            color: color_u8!(120, 220, 255, 255),
         },
     )
 }
@@ -154,8 +170,11 @@ async fn main() {
         if is_mouse_button_down(MouseButton::Left) {
             if !mouse_pressed {
                 let pos = get_relative_mouse_position(&main_camera);
-                let _ = world.push(create_particle(pos));
-                info!("Mouse pressed at x:{} , y:{}", pos.x, pos.y)
+                info!("Mouse pressed at x:{} , y:{}", pos.x, pos.y);
+                for _ in 0..10 {
+                    let _ = world.push(create_particle(pos));
+                    let _ = world.push(create_obj(pos));
+                }
             }
             mouse_pressed = true;
         } else {
@@ -177,12 +196,12 @@ async fn main() {
         let mut query = <(&Position, &Circle)>::query();
 
         for (position, circle) in query.iter_mut(&mut world) {
-            draw_circle(
-                position.pos.x,
-                position.pos.y,
-                circle.r,
-                color_u8!(100, 150, 200, 255),
-            )
+            draw_circle(position.pos.x, position.pos.y, circle.r, circle.color)
+        }
+
+        let mut query = <(&Object, &Circle)>::query();
+        for (object, circle) in query.iter(&world) {
+            draw_circle(object.pos.x, object.pos.y, circle.r, circle.color)
         }
 
         draw_circle(
