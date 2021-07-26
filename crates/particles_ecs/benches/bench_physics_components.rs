@@ -1,6 +1,7 @@
+use particles_ecs::components::common;
 use particles_ecs::components::physics_components;
 use particles_ecs::components::physics_obj;
-use particles_ecs::systems::*;
+use particles_ecs::systems::physics_systems::*;
 
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
 use pprof::criterion::{Output, PProfProfiler};

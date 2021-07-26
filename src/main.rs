@@ -22,7 +22,8 @@
 #![allow(
     clippy::missing_docs_in_private_items,
     unknown_lints,
-    clippy::expect_used
+    clippy::expect_used,
+    clippy::shadow_reuse
 )]
 
 use macroquad::camera::{set_camera, set_default_camera, Camera2D};
@@ -37,11 +38,9 @@ use macroquad::text::draw_text;
 use macroquad::time::get_time;
 use macroquad::window::{clear_background, next_frame, screen_height, screen_width};
 use particles_ecs::components::common::{Camera, Circle, Time};
-use particles_ecs::components::physics_components::{Acceleration, Mass, Position, Velocity};
+use particles_ecs::components::physics::{Acceleration, Mass, Position, Velocity};
 use particles_ecs::components::physics_obj::Object;
-use particles_ecs::systems::physics_systems::{
-    get_component_objects, get_objects, resources, schedule, world,
-};
+use particles_ecs::systems::physics::{get_component_objects, get_objects, init_world};
 
 fn draw_ui() {
     // Screen space, render fixed ui
@@ -102,7 +101,7 @@ fn create_obj(position: Vec2) -> (Object, Circle) {
             pos: position,
             vel: Vec2::new(0.0, 0.0),
             acc: Vec2::new(rand::gen_range(-400., 400.), rand::gen_range(-400., 400.)),
-            mass: mass,
+            mass,
         },
         Circle {
             r: (mass / std::f32::consts::PI).sqrt(),
@@ -132,18 +131,7 @@ fn create_particle(position: Vec2) -> (Position, Velocity, Acceleration, Mass, C
 #[allow(clippy::future_not_send, clippy::too_many_lines)]
 #[macroquad::main("Name")]
 async fn main() {
-    let mut world = world();
-    let mut resources = resources();
-
-    let mut time = Time {
-        elapsed_seconds: 0.0,
-        overall_time: 0.0,
-    };
-    resources.insert(time);
-
-    // construct a schedule (you should do this on init)
-    let mut schedule = schedule();
-
+    let (mut world, mut resources, mut time, mut schedule) = init_world();
     let starting_zoom = 0.05;
     let mut main_camera = Camera {
         target: vec2(0.0, 0.0),

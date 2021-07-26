@@ -1,19 +1,35 @@
-use crate::components::common::*;
-use crate::components::physics_components::*;
-use crate::components::physics_obj::*;
+use crate::components::common::{Circle, Time};
+use crate::components::physics::{Acceleration, Mass, Position, Velocity};
+use crate::components::physics_obj::Object;
 use legion::{system, IntoQuery, Query, Resources, Schedule, World};
 use macroquad::math::Vec2;
 
-pub fn resources() -> Resources {
-    let mut resources = Resources::default();
+#[must_use]
+pub fn init_world() -> (World, Resources, Time, Schedule) {
+    let world = world();
+    let mut resources = resources();
 
-    resources
+    let time = Time {
+        elapsed_seconds: 0.0,
+        overall_time: 0.0,
+    };
+    resources.insert(time);
+
+    let schedule = schedule();
+    (world, resources, time, schedule)
 }
 
+#[must_use]
+pub fn resources() -> Resources {
+    Resources::default()
+}
+
+#[must_use]
 pub fn world() -> World {
     World::default()
 }
 
+#[must_use]
 pub fn schedule() -> Schedule {
     // construct a schedule (you should do this on init)
     Schedule::builder()
@@ -26,21 +42,12 @@ pub fn schedule() -> Schedule {
         .build()
 }
 
+#[must_use]
 pub fn get_component_objects() -> Query<(&'static Position, &'static Circle)> {
     <(&Position, &Circle)>::query()
-
-    /*
-    for (position, circle) in query.iter_mut(&mut world) {
-        draw_circle(position.pos.x, position.pos.y, circle.r, circle.color)
-    }
-
-    let mut query = <(&Object, &Circle)>::query();
-    for (object, circle) in query.iter(&world) {
-        draw_circle(object.pos.x, object.pos.y, circle.r, circle.color)
-    }
-     */
 }
 
+#[must_use]
 pub fn get_objects() -> Query<(&'static Object, &'static Circle)> {
     <(&Object, &Circle)>::query()
 }
