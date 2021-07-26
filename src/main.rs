@@ -25,7 +25,7 @@
     clippy::expect_used
 )]
 
-use legion::{IntoQuery, Resources, World};
+use legion::IntoQuery;
 use macroquad::camera::{set_camera, set_default_camera, Camera2D};
 use macroquad::color::Color;
 use macroquad::color_u8;
@@ -40,7 +40,7 @@ use macroquad::window::{clear_background, next_frame, screen_height, screen_widt
 use particles_ecs::components::common::{Camera, Circle, Time};
 use particles_ecs::components::physics_components::{Acceleration, Mass, Position, Velocity};
 use particles_ecs::components::physics_obj::Object;
-use particles_ecs::systems::physics_systems::init;
+use particles_ecs::systems::physics_systems::{resources, schedule, world};
 
 fn draw_ui() {
     // Screen space, render fixed ui
@@ -131,8 +131,9 @@ fn create_particle(position: Vec2) -> (Position, Velocity, Acceleration, Mass, C
 #[allow(clippy::future_not_send, clippy::too_many_lines)]
 #[macroquad::main("Name")]
 async fn main() {
-    let mut world = World::default();
-    let mut resources = Resources::default();
+    let mut world = world();
+    let mut resources = resources();
+
     let mut time = Time {
         elapsed_seconds: 0.0,
         overall_time: 0.0,
@@ -140,7 +141,7 @@ async fn main() {
     resources.insert(time);
 
     // construct a schedule (you should do this on init)
-    let mut schedule = init();
+    let mut schedule = schedule();
 
     let starting_zoom = 0.05;
     let mut main_camera = Camera {
@@ -154,13 +155,13 @@ async fn main() {
     let mut mouse_pressed = false;
 
     loop {
-        // Update
         time = Time {
             elapsed_seconds: get_time() - time.overall_time,
             overall_time: get_time(),
         };
         //info!("{}", time.elapsed_seconds);
         resources.insert(time);
+
         let mouse_position = get_relative_mouse_position(&main_camera);
         move_camera(&mut main_camera);
         if is_key_down(KeyCode::Right) {}

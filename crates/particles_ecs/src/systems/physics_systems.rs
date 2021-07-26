@@ -1,10 +1,20 @@
 use crate::components::common::*;
 use crate::components::physics_components::*;
 use crate::components::physics_obj::*;
-use legion::{system, Schedule};
+use legion::{system, Resources, Schedule, World};
 use macroquad::math::Vec2;
 
-pub fn init() -> Schedule {
+pub fn resources() -> Resources {
+    let mut resources = Resources::default();
+
+    resources
+}
+
+pub fn world() -> World {
+    World::default()
+}
+
+pub fn schedule() -> Schedule {
     // construct a schedule (you should do this on init)
     Schedule::builder()
         .add_system(apply_gravity_system())
