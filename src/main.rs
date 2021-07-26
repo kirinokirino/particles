@@ -25,10 +25,6 @@
     clippy::expect_used
 )]
 
-pub mod systems;
-use systems::init;
-pub mod components;
-use components::{Acceleration, Camera, Circle, Mass, Object, Position, Time, Velocity};
 use legion::{IntoQuery, Resources, World};
 use macroquad::camera::{set_camera, set_default_camera, Camera2D};
 use macroquad::color::Color;
@@ -41,6 +37,10 @@ use macroquad::shapes::draw_circle;
 use macroquad::text::draw_text;
 use macroquad::time::get_time;
 use macroquad::window::{clear_background, next_frame, screen_height, screen_width};
+use particles_ecs::components::common::{Camera, Circle, Time};
+use particles_ecs::components::physics_components::{Acceleration, Mass, Position, Velocity};
+use particles_ecs::components::physics_obj::Object;
+use particles_ecs::systems::physics_systems::init;
 
 fn draw_ui() {
     // Screen space, render fixed ui

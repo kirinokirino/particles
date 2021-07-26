@@ -1,9 +1,9 @@
 [package]
-name = "particles"
+name = "particles_ecs"
 version = "0.1.0"
 authors = ["kirinokirino <kirinokirino@lunariko.com>"]
 edition = "2018"
-description = "A template for processing-like sketches, using macroquad and legion"
+description = "ECS subcrate for particles."
 repository = "https://github.com/kirinokirino/particles"
 documentation = ""
 homepage = ""
@@ -12,16 +12,14 @@ license = "gpl"
 keywords = ["game"]
 categories = ["games"]
 
-[workspace]
-members = ["crates/*"]
-
 [dependencies]
-particles_ecs = {path = "crates/particles_ecs", version = "0.1.0" }
 macroquad = { version = "0.3.7", default-features = false, features = ["log-impl"] }
 legion = { version = "0.4.0", default-features = false, features = ["codegen"] }
 
-[profile.dev]
-opt-level = 1
+[dev-dependencies]
+criterion = "0.3"
+pprof = { version = "0.4.3", features = ["flamegraph", "criterion"] }
 
-[profile.release]
-dubug = true
+[[bench]]
+name = "bench_physics_components"
+harness = false

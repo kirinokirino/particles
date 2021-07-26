@@ -1,4 +1,6 @@
-use crate::components::{Acceleration, Mass, Object, Position, Time, Velocity};
+use crate::components::common::*;
+use crate::components::physics_components::*;
+use crate::components::physics_obj::*;
 use legion::{system, Schedule};
 use macroquad::math::Vec2;
 
