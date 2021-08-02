@@ -7,3 +7,14 @@ pub struct Object {
     pub acc: Vec2,
     pub mass: f32,
 }
+
+impl Default for Object {
+    fn default() -> Self {
+        Self {
+            pos: Vec2::ZERO,
+            vel: Vec2::ZERO,
+            acc: Vec2::ZERO,
+            mass: 0.0,
+        }
+    }
+}

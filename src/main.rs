@@ -142,7 +142,6 @@ async fn main() {
     };
 
     let mut mouse_pressed = false;
-
     loop {
         time = Time {
             elapsed_seconds: get_time() - time.overall_time,
@@ -185,7 +184,7 @@ async fn main() {
         // construct a query from a "view tuple"
         let mut query = get_component_objects();
 
-        for (position, circle) in query.iter_mut(&mut world) {
+        for (position, circle) in query.iter(&mut world) {
             draw_circle(position.pos.x, position.pos.y, circle.r, circle.color)
         }
 
